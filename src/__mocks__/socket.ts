@@ -30,8 +30,9 @@ class SocketMock extends events.EventEmitter {
   __send__(message: Message, protocol: Protocol) {
     switch(protocol) {
       case 'CLIENT_SERVER': {
-        const newId = uuid.v4()
-        message = message.with(newId)
+        message = message.with({
+          id: uuid.v4()
+        })
       }
     }
 
@@ -51,7 +52,9 @@ class SocketMock extends events.EventEmitter {
     }
 
     if (protocol === 'CLIENT_SERVER') {
-      response = response.with(message.id)
+      response = response.with({
+        id: message.id
+      })
     }
 
     // console.log('<<<', response)

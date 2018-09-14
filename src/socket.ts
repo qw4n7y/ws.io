@@ -49,8 +49,9 @@ class Socket extends events.EventEmitter {
 
     switch(protocol) {
       case 'CLIENT_SERVER': {
-        const newId = uuid.v4()
-        message = message.with(newId)
+        message = message.with({
+          id: uuid.v4()
+        })
       }
     }
     

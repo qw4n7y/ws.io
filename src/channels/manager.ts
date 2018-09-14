@@ -12,6 +12,15 @@ class Manager {
     socket.on('message', this.reducer.bind(this, socket))
   }
 
+  public getOrCreateChannel(channelName: string) {
+    let channel = this.channels[channelName]
+    if (!channel) {
+      channel = new Channel(channelName)
+      this.channels[channelName] = channel
+    }
+    return channel
+  }
+
   private reducer(socket: Socket, message: Message) {
     if (message.type === 'subscribe') {
       return this.onSubscribe(socket, message)

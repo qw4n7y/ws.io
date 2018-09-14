@@ -16,8 +16,11 @@ class Message {
     this.subscriptionId = subscriptionId
   }
 
-  public with(newId: MessageId) {
-    const message = new Message(this.type, this.payload, newId, this.subscriptionId)
+  public with(props: Partial<{id: MessageId, subscriptionId: SubscriptionId}>) {
+    const newId = props.id ? props.id : this.id
+    const newSubscriptionId = props.subscriptionId ? props.subscriptionId : this.subscriptionId
+
+    const message = new Message(this.type, this.payload, newId, newSubscriptionId)
     return message
   }
 

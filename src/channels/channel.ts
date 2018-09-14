@@ -31,7 +31,11 @@ class Channel {
         continue
       }
 
-      await subscription.socket.send(message, 'PUSH')
+      const socketMessage = message.with({
+        subscriptionId: subscription.id
+      })
+
+      await subscription.socket.send(socketMessage, 'PUSH')
     }
   }
 }

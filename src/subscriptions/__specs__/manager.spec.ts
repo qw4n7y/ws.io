@@ -7,7 +7,7 @@ jest.mock('./../../socket.ts')
 
 const channel = 'BTC/USD'
 
-describe('Manager', () => {
+describe('Subscription Manager', () => {
 
   describe('subscribe', () => {
     it ('subscribes socket to channel', async (done) => {
