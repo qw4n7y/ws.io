@@ -10,7 +10,7 @@ describe('Socket', () => {
     it('does not send messages when inactive', async (done) => {
       expect.assertions(1)
 
-      const socket = new Socket("http://dummy");
+      const socket = Socket.connect("http://dummy");
       (socket as any).isActive = () => false
 
       try {

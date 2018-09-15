@@ -1,4 +1,4 @@
-import * as WS from 'ws'
+import * as WS from 'isomorphic-ws'
 import * as events from 'events'
 import * as uuid from 'uuid'
 
@@ -11,10 +11,16 @@ class Socket extends events.EventEmitter {
   private ws: WS
   private TIMEOUT_MS: number = 5000
 
-  constructor(address: string, options?: WS.ClientOptions) {
+  constructor(ws: WS) {
     super()
-    this.ws = new WS(address, options)
+    this.ws = ws
     this.bindEventHandlers()
+  }
+
+  public static connect(address: string, options?: WS.ClientOptions) {
+    const ws = new WS(address, options)
+    const socket = new Socket(ws)
+    return socket
   }
 
   public isActive() {
@@ -22,24 +28,23 @@ class Socket extends events.EventEmitter {
   }
 
   private bindEventHandlers() {
-    this.ws.on('close', (ws: WS, code: number, reason: string) => {
-      this.ws.terminate()
-      this.emit('close', code, reason)
-    })
-    this.ws.on('error', (ws: WS, error: Error) => {
-      this.emit('error', error)
-    })
-    this.ws.on('open', (ws: WS) => {
+    this.ws.onopen = (event: any) => {
       this.emit('open')
-    })
-    this.ws.on('message', (ws: WS, data: WS.Data) => {
+    }
+    this.ws.onerror = (event: {error: any, message: string, type: string}) => {
+      this.emit('error', event.error)
+    }
+    this.ws.onclose = (event: { wasClean: boolean; code: number; reason: string }) => {
+      this.emit('close', event.code, event.reason)
+    }
+    this.ws.onmessage = (event: { data: any; type: string }) => {
       try {
-        const message = this.receiveRaw(data)
+        const message = this.receiveRaw(event.data)
         this.emit('message', message)
       } catch (error) {
         this.emit('error', error)
       }
-    })
+    }
   }
 
   public send(message: Message, protocol: Protocol = 'PUSH'): Promise<Message | undefined> {
@@ -69,12 +74,14 @@ class Socket extends events.EventEmitter {
           }, this.TIMEOUT_MS)
 
           const callback = (response: Message) => {
-            if (message.id === response.id) {
-              clearTimeout(timeout)
-              this.off('message', callback)
-
-              resolve(response)
+            if (message.id !== response.id) {
+              return
             }
+
+            clearTimeout(timeout)
+            // this.off('message', callback)
+
+            resolve(response)
           }
   
           this.on('message', callback)
@@ -90,9 +97,7 @@ class Socket extends events.EventEmitter {
 
   private sendRaw(message: Message, onError: (error: Error) => void) {
     const data = JSON.stringify(message)
-    this.ws.send(data, {
-      binary: true
-    }, (err?: Error) => {
+    this.ws.send(data, {}, (err?: Error) => {
       if (err) {
         onError(err)
       }

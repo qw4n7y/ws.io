@@ -9,7 +9,7 @@ class Manager {
   public readonly channels: {[key: string]: Channel} = {}
 
   public listen(socket: Socket) {
-    socket.on('message', this.reducer.bind(this, socket))
+    socket.on('message', this.onMessage.bind(this, socket))
   }
 
   public getOrCreateChannel(channelName: string) {
@@ -21,17 +21,26 @@ class Manager {
     return channel
   }
 
-  private reducer(socket: Socket, message: Message) {
+  private onMessage(socket: Socket, message: Message) {
+    this.reducer(socket, message)
+      .catch((error: Error) => {
+        console.error(`Reducer: error ${error} handling ${message}`)
+      })
+  }
+
+  private async reducer(socket: Socket, message: Message) {
     if (message.type === 'subscribe') {
-      return this.onSubscribe(socket, message)
+      await this.onSubscribe(socket, message)
+      return
     }
 
     if (message.type === 'unsubscribe') {
-      return this.onUnsubscribe(socket, message)
+      await this.onUnsubscribe(socket, message)
+      return
     }
   }
 
-  private onSubscribe(socket: Socket, message: Message) {
+  private async onSubscribe(socket: Socket, message: Message) {
     let invalid = !message.payload || !message.payload.channel
     if (invalid) {
       const error = new Error(`Got bizzare subscribe request: ${JSON.stringify(message)}`)
@@ -53,9 +62,15 @@ class Manager {
     }
 
     channel.add(subscription)
+
+    // Send ack
+    const ackMessage = new Message('subscribed', {
+      subscription: subscription.toJSON()
+    }, message.id)
+    await socket.send(ackMessage, 'PUSH')
   }
 
-  private onUnsubscribe(socket: Socket, message: Message) {
+  private async onUnsubscribe(socket: Socket, message: Message) {
     let invalid = !message.payload || !message.payload.subscription
     if (invalid) {
       const error = new Error(`Got bizzare unsubscribe request: ${JSON.stringify(message)}`)
@@ -76,6 +91,12 @@ class Manager {
     }
 
     channel.remove(subscription)
+
+    // Send ack
+    const ackMessage = new Message('unsubscribed', {
+      subscription: subscription.toJSON()
+    }, message.id)
+    await socket.send(ackMessage, 'PUSH')
   }
 }
 

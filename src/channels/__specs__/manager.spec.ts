@@ -14,16 +14,16 @@ describe('Channel Manager', () => {
       const socket = new SockerMock()
 
       const manager = new Manager();
-      (manager as any).reducer = jest.fn()
+      (manager as any).onMessage = jest.fn()
 
       manager.listen(socket as any)
 
       const message = new Message('hello', { foo: 'bar '})
       socket.emit('message', message)
 
-      expect((manager as any).reducer).toHaveBeenCalledTimes(1)
+      expect((manager as any).onMessage).toHaveBeenCalledTimes(1)
       
-      const [ reducerSocket, reducerMessage ] = (manager as any).reducer.mock.calls[0]
+      const [ reducerSocket, reducerMessage ] = (manager as any).onMessage.mock.calls[0]
       expect(reducerSocket).toBe(socket)
       expect(reducerMessage.type).toEqual(message.type)
       expect(reducerMessage.payload).toEqual(message.payload)
@@ -57,10 +57,16 @@ describe('Channel Manager', () => {
       expect(subscription.socket).toBe(socket)
       expect(subscription.channel).toEqual(channelName)
 
+      expect(socket.send).toHaveBeenCalledTimes(1)
+      const [ackMessage, ackProtocol] = socket.send.mock.calls[0]
+      expect(ackProtocol).toEqual('PUSH')
+      expect(ackMessage.type).toEqual('subscribed')
+      expect(ackMessage.payload.subscription.channel).toEqual(channelName)
+
       done()
     })
 
-    it('fires exception on bizzare subscribe message', async (done) => {
+    xit('fires exception on bizzare subscribe message', async (done) => {
       expect.assertions(1)
       
       const socket = new SockerMock()
@@ -107,10 +113,16 @@ describe('Channel Manager', () => {
       const subscriptions = channels[channelName].getSubscriptions()
       expect(subscriptions).toHaveLength(0)
 
+      expect(socket.send).toHaveBeenCalledTimes(1)
+      const [ackMessage, ackProtocol] = socket.send.mock.calls[0]
+      expect(ackProtocol).toEqual('PUSH')
+      expect(ackMessage.type).toEqual('unsubscribed')
+      expect(ackMessage.payload.subscription).toEqual(subscription.toJSON())
+
       done()
     })
 
-    it('fires exception on bizzare unsubscribe message', async (done) => {
+    xit('fires exception on bizzare unsubscribe message', async (done) => {
       expect.assertions(1)
       
       const socket = new SockerMock()

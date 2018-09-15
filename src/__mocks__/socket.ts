@@ -36,8 +36,6 @@ class SocketMock extends events.EventEmitter {
       }
     }
 
-    // console.log('>>>', message)
-
     let response: ResponseMock
 
     if (this.currentResponse >= this.responses.length) {
@@ -56,8 +54,6 @@ class SocketMock extends events.EventEmitter {
         id: message.id
       })
     }
-
-    // console.log('<<<', response)
 
     return Promise.resolve(response)
   }
