@@ -2,6 +2,7 @@ import Manager from './../manager'
 import Subscription from './../subscription'
 import Message from './../../message'
 import SocketMock from './../../__mocks__/socket'
+import * as Errors from '../../errors'
 
 jest.mock('./../../socket.ts')
 
@@ -50,7 +51,7 @@ describe('Subscription Manager', () => {
       done()
     })
 
-    it ('fires exception on getting bizzare response', async (done) => {
+    it ('fires exception on getting bizarre response', async (done) => {
       expect.assertions(1)
 
       const socket = new SocketMock([
@@ -61,7 +62,7 @@ describe('Subscription Manager', () => {
       try {
         await manager.subscribe(channel)
       } catch (error) {
-        expect(error.message).toMatch(/Got bizzare subscribe response/)
+        expect(error).toBeInstanceOf(Errors.BizarreMessage)
       }
   
       done()
@@ -168,7 +169,7 @@ describe('Subscription Manager', () => {
       done()
     })
 
-    it ('fires exception on getting bizzare response', async (done) => {
+    it ('fires exception on getting bizarre response', async (done) => {
       expect.assertions(1)
 
       const socket = new SocketMock([
@@ -181,7 +182,7 @@ describe('Subscription Manager', () => {
       try {
         await manager.unsubscribe(subscription)
       } catch (error) {
-        expect(error.message).toMatch(/Got bizzare unsubscribe response/)
+        expect(error).toBeInstanceOf(Errors.BizarreMessage)
       }
   
       done()

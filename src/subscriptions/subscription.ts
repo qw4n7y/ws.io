@@ -12,9 +12,12 @@ class Subscription extends events.EventEmitter {
 
   constructor(id: SubscriptionId, channel: string, socket: Socket) {
     super()
+    
     this.id = id
     this.channel = channel
     this.socket = socket
+
+    this.bindSocketEventHandlers()
   }
 
   public toJSON() {
@@ -27,6 +30,12 @@ class Subscription extends events.EventEmitter {
   public static fromJSON(data: any, socket: Socket) {
     const subscription = new Subscription(data.id, data.channel, socket)
     return subscription
+  }
+
+  private bindSocketEventHandlers() {
+    this.socket.on('dead', () => {
+      this.emit('dead')
+    })
   }
 }
 

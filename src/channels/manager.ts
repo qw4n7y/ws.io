@@ -2,8 +2,9 @@ import * as uuid from 'uuid'
 
 import Channel from './channel'
 import Subscription from './../subscriptions/subscription'
-import Socket from '../socket';
+import Socket from '../socket'
 import Message from '../message'
+import * as Errors from '../errors'
 
 class Manager {
   public readonly channels: {[key: string]: Channel} = {}
@@ -43,7 +44,7 @@ class Manager {
   private async onSubscribe(socket: Socket, message: Message) {
     let invalid = !message.payload || !message.payload.channel
     if (invalid) {
-      const error = new Error(`Got bizzare subscribe request: ${JSON.stringify(message)}`)
+      const error = new Errors.BizarreMessage(JSON.stringify(message))
       throw error
     }
 
@@ -73,7 +74,7 @@ class Manager {
   private async onUnsubscribe(socket: Socket, message: Message) {
     let invalid = !message.payload || !message.payload.subscription
     if (invalid) {
-      const error = new Error(`Got bizzare unsubscribe request: ${JSON.stringify(message)}`)
+      const error = new Errors.BizarreMessage(JSON.stringify(message))
       throw error
     }
 

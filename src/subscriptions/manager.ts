@@ -1,6 +1,7 @@
 import Socket from '../socket'
 import Subscription from './subscription'
-import Message from '../message';
+import Message from '../message'
+import * as Errors from '../errors'
 
 class Manager {
   private socket: Socket
@@ -16,8 +17,6 @@ class Manager {
   }
 
   private onMessage(message: Message) {
-    // console.log('[debug] onMessage: ', message)
-
     const subscriptionId = message.subscriptionId
     if (!subscriptionId) {
       return
@@ -43,7 +42,7 @@ class Manager {
       let invalid = response.type !== 'subscribed' || !response.payload || !response.payload.subscription
 
       if (invalid) {
-        const error = new Error(`Got bizzare subscribe response: ${JSON.stringify(response)}`)
+        const error = new Errors.BizarreMessage(JSON.stringify(response))
         throw error
       }
 
@@ -63,13 +62,13 @@ class Manager {
       let invalid = response.type !== 'unsubscribed' || !response.payload || !response.payload.subscription
 
       if (invalid) {
-        const error = new Error(`Got bizzare unsubscribe response: ${JSON.stringify(response)}`)
+        const error = new Errors.BizarreMessage(JSON.stringify(response))
         throw error
       }
 
       const serverSubscription = Subscription.fromJSON(response.payload.subscription, this.socket)
       if (serverSubscription.id !== subscription.id) {
-        const error = new Error(`Desync: ${JSON.stringify(serverSubscription)} on server, ${JSON.stringify(subscription)} on client`)
+        const error = new Errors.BizarreMessage(`Desync: ${JSON.stringify(serverSubscription)} on server, ${JSON.stringify(subscription)} on client`)
         throw error
       }
 

@@ -5,6 +5,7 @@ import Channel from './channels/channel'
 import ChannelManager from './channels/manager'
 import Subscription from './subscriptions/subscription'
 import SubscriptionManager from './subscriptions/manager'
+import * as Errors from './errors'
 
 if (typeof window !== 'undefined') {
     (window as any).Socket = Socket;
@@ -18,5 +19,6 @@ if (typeof window !== 'undefined') {
 
 export {
     Socket, Server, Channel, ChannelManager,
-    Subscription, SubscriptionManager
+    Subscription, SubscriptionManager,
+    Errors
 }

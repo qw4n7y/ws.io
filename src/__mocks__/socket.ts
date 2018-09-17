@@ -4,6 +4,9 @@ import * as uuid from 'uuid'
 import Message from './../message'
 import { Protocol } from './../socket'
 
+import HearbeatMock from './../socket/__mocks__/heartbeat'
+import PingPongMock from './../socket/__mocks__/pingpong'
+
 type ResponseMock = Message | Error
 
 const DEFAULT_RESPONSE = new Message('echo')
@@ -12,6 +15,9 @@ class SocketMock extends events.EventEmitter {
   private responses: ResponseMock[] = []
   private currentResponse = 0
   private defaultResponse: ResponseMock
+
+  public readonly heartbeat = new HearbeatMock(null)
+  public readonly pingpong = new PingPongMock(null)
 
   public send: jest.Mock<{}>
 
@@ -23,7 +29,11 @@ class SocketMock extends events.EventEmitter {
     this.send = jest.fn(this.__send__.bind(this))
   }
 
-  isActive() {
+  public isAlive() {
+    return true
+  }
+
+  public isOpen() {
     return true
   }
 

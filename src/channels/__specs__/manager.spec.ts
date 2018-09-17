@@ -1,8 +1,9 @@
 import Manager from './../manager'
 import Message from './../../message'
 import SockerMock from './../../__mocks__/socket'
-import Subscription from '../../subscriptions/subscription';
-import Channel from '../channel';
+import Subscription from '../../subscriptions/subscription'
+import Channel from '../channel'
+import * as Errors from '../../errors'
 
 const channelName = 'BTC/USD'
 
@@ -66,7 +67,7 @@ describe('Channel Manager', () => {
       done()
     })
 
-    xit('fires exception on bizzare subscribe message', async (done) => {
+    xit('fires exception on bizarre subscribe message', async (done) => {
       expect.assertions(1)
       
       const socket = new SockerMock()
@@ -79,7 +80,7 @@ describe('Channel Manager', () => {
       try {
         socket.emit('message', message)
       } catch(error) {
-        expect(error.message).toMatch(/Got bizzare subscribe request/)
+        expect(error).toBeInstanceOf(Errors.BizarreMessage)
       }
 
       done()
@@ -122,7 +123,7 @@ describe('Channel Manager', () => {
       done()
     })
 
-    xit('fires exception on bizzare unsubscribe message', async (done) => {
+    xit('fires exception on bizarre unsubscribe message', async (done) => {
       expect.assertions(1)
       
       const socket = new SockerMock()
@@ -135,7 +136,7 @@ describe('Channel Manager', () => {
       try {
         socket.emit('message', message)
       } catch(error) {
-        expect(error.message).toMatch(/Got bizzare unsubscribe request/)
+        expect(error).toBeInstanceOf(Errors.BizarreMessage)
       }
 
       done()

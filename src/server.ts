@@ -6,6 +6,7 @@ import Socket from './socket'
 class Server extends events.EventEmitter {
 
     private wss: WS.Server
+    private sockets: Socket[] = []
 
     public listen(options: Partial<{host: string, port: number}>) {
         this.wss = new WS.Server({
@@ -19,6 +20,9 @@ class Server extends events.EventEmitter {
 
     private onConnection(ws: WS) {
         const socket = new Socket(ws)
+        this.bindSocketEventHandlers(socket)
+        
+        this.sockets.push(socket)
         this.emit('connection', socket)
     }
 
@@ -27,6 +31,11 @@ class Server extends events.EventEmitter {
         this.emit('error', error)
     }
 
+    private bindSocketEventHandlers(socket: Socket) {
+        socket.on('dead', () => {
+            this.sockets = this.sockets.filter(s => s !== socket)
+        })
+    }
 }
 
 export default Server

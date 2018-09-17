@@ -18,16 +18,25 @@ class Channel {
       return
     }
 
+    subscription.on('dead', () => {
+      this.remove(subscription)
+    })
+
+    console.log(`Subscription ${subscription.id} was added to channel ${this.name}`)
     this.subscriptions.push(subscription)
   }
 
   public remove(subscription: Subscription) {
+    console.log(`Subscription ${subscription.id} was removed from channel ${this.name}`)
     this.subscriptions = this.subscriptions.filter(s => s !== subscription)
   }
 
   public async broadcast(message: Message) {
     for (let subscription of this.subscriptions) {
-      if (!subscription.socket.isActive()) {
+      if (!subscription.socket.isAlive()) {
+        continue
+      }
+      if (!subscription.socket.isOpen()) {
         continue
       }
 
@@ -37,6 +46,10 @@ class Channel {
 
       await subscription.socket.send(socketMessage, 'PUSH')
     }
+  }
+
+  private bindSocketEventsHandlers() {
+    
   }
 }
 
