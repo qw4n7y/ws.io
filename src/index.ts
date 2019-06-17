@@ -20,5 +20,5 @@ if (typeof window !== 'undefined') {
 export {
     Socket, Server, Channel, ChannelManager,
     Subscription, SubscriptionManager,
-    Errors
+    Errors, Message
 }
