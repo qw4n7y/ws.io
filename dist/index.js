@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const socket_1 = require("./socket");
 exports.Socket = socket_1.default;
 const message_1 = require("./message");
+exports.Message = message_1.default;
 const server_1 = require("./server");
 exports.Server = server_1.default;
 const channel_1 = require("./channels/channel");
